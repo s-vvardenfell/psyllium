@@ -45,6 +45,11 @@ func init() {
 }
 
 func initConfig() {
+	ConfigureViper()
+	ConfigureLogrus()
+}
+
+func ConfigureViper() {
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	} else {
@@ -67,7 +72,9 @@ func initConfig() {
 	if err := viper.Unmarshal(&cnfg); err != nil {
 		cobra.CheckErr(err)
 	}
+}
 
+func ConfigureLogrus() {
 	if cnfg.Logrus.ToFile {
 		if err := os.Mkdir(filepath.Dir(cnfg.Logrus.LogDir), 0777); err != nil && !errors.Is(err, os.ErrExist) {
 			cobra.CheckErr(err)
