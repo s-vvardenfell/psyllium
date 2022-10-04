@@ -9,12 +9,21 @@ import (
 )
 
 /*
+// usage example:
+
 	filename := "file"
 	dataChan := make(chan string)
 	errChan := make(chan error)
+	ctx, cancel := context.WithCancel(context.Background())
 
-	// go ReadFile(filename, dataChan, errChan)
-	go ReadFile2(filename, dataChan, errChan)
+	defer cancel()
+
+	go ReadFileToChan(ctx, filename, dataChan, errChan)
+
+	go func() {
+		time.Sleep(30 * time.Second)
+		cancel()
+	}()
 
 	for {
 		select {
@@ -22,21 +31,16 @@ import (
 			fmt.Println(data)
 		case err := <-errChan:
 			fmt.Printf("Selected err case, %v\n", err)
-			// default:
-			// 	continue
-			// 	break
+			return
 		}
 	}
 */
 
-/*
-TODO
-use ctx
-args to struct
-сравнить с вариантом из "облачного го"
-сделать селект, в одном кейсе будет тикер, в другом контекст на отмену - попробовать в соседней функции-копии
-*/
-func ReadFileToChan(ctx context.Context, filename string, dataCh chan<- string, errCh chan<- error) {
+// ReadFileToChan opens a given file by its name and reads it line by line
+// to channel 'dataCh' with frequency 'freq'; Writes error to 'errCh' if occurs
+func ReadFileToChan(
+	ctx context.Context, filename string, dataCh chan<- string, errCh chan<- error, freq int) {
+
 	f, err := os.Open(filename)
 	if err != nil {
 		errCh <- err
@@ -45,19 +49,25 @@ func ReadFileToChan(ctx context.Context, filename string, dataCh chan<- string, 
 	defer f.Close()
 
 	rd := bufio.NewReader(f)
+
+	ticker := time.NewTicker(time.Duration(freq) * time.Second)
+
 	for {
-		line, err := rd.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				rd.Reset(f)
-			} else {
-				errCh <- err
-				return
+		select {
+		case <-ctx.Done():
+			errCh <- ctx.Err()
+		case <-ticker.C:
+			line, err := rd.ReadString('\n')
+			if err != nil {
+				if err == io.EOF {
+					rd.Reset(f)
+				} else {
+					errCh <- err
+					return
+				}
 			}
 
-			time.Sleep(3 * time.Second)
+			dataCh <- line
 		}
-
-		dataCh <- line
 	}
 }
