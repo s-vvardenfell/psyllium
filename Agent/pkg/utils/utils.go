@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"agent/internal/core"
 	"bufio"
 	"context"
 	"io"
@@ -39,7 +40,7 @@ import (
 // ReadFileToChan opens a given file by its name and reads it line by line
 // to channel 'dataCh' with frequency 'freq'; Writes error to 'errCh' if occurs
 func ReadFileToChan(
-	ctx context.Context, filename string, dataCh chan<- string, errCh chan<- error, freq int) {
+	ctx context.Context, filename string, dataCh chan<- core.Event, errCh chan error, freq int) {
 
 	f, err := os.Open(filename)
 	if err != nil {
@@ -67,7 +68,7 @@ func ReadFileToChan(
 				}
 			}
 
-			dataCh <- line
+			dataCh <- core.Event{What: line}
 		}
 	}
 }

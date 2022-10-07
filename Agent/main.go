@@ -9,8 +9,8 @@ import (
 
 func main() {
 	// cmd.Execute()
-
-	la := linux_agent.NewLinuxAgent()
+	logs := []string{"/var/log/auth.log", "/var/log/auth.log1"}
+	la := linux_agent.NewLinuxAgent(logs)
 	// wa := windows_agent.NewWindowsAgent()
 
 	c := core.NewCore()

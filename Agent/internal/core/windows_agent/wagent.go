@@ -1,7 +1,6 @@
 package windows_agent
 
 import (
-	"agent/internal/core"
 	"fmt"
 )
 
@@ -15,7 +14,7 @@ func NewWindowsAgent() *WindowsAgent {
 	}
 }
 
-func (l *WindowsAgent) GetEvents() (c <-chan core.Events) {
+func (l *WindowsAgent) GetEvents() {
 	fmt.Println(l.msg)
 	return
 }
