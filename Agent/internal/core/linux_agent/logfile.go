@@ -2,8 +2,11 @@ package linux_agent
 
 import (
 	"bufio"
+	"context"
 	"fmt"
+	"io"
 	"os"
+	"time"
 )
 
 // TODO other pkg or core lvl
@@ -14,6 +17,7 @@ type LogFile struct {
 }
 
 // wg to args?
+// TODO CTX
 func (l *LogFile) readOldEvents(events chan<- string, errs chan<- error, done chan<- int) {
 	var err error
 	fmt.Printf("START READ %s\n", l.FileName) // TEST
@@ -38,10 +42,29 @@ func (l *LogFile) readOldEvents(events chan<- string, errs chan<- error, done ch
 	done <- 1
 }
 
-func (l *LogFile) readNewEvents() {
+func (l *LogFile) readNewEvents(ctx context.Context, events chan<- string, errs chan<- error) {
+	defer l.File.Close()
 
-}
+	rd := bufio.NewReader(l.File)
+	// rd.Reset(l.File)
+	ticker := time.NewTicker(time.Duration(freq) * time.Second)
 
-func (l *LogFile) CleanUp() {
-	_ = l.File.Close()
+	for {
+		select {
+		case <-ctx.Done():
+			errs <- ctx.Err()
+		case <-ticker.C:
+			line, err := rd.ReadString('\n')
+			if err != nil {
+				if err == io.EOF {
+					rd.Reset(l.File)
+				} else {
+					errs <- err
+					return
+				}
+			}
+
+			events <- line
+		}
+	}
 }
