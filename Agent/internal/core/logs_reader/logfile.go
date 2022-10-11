@@ -4,12 +4,15 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"os"
+	"time"
 )
 
 type LogFile struct {
-	File    *os.File
-	Scanner *bufio.Scanner
+	File     *os.File
+	Reader   *bufio.Reader
+	fileName string //for dev p-s, will be removed
 }
 
 func NewLogFile(filename string) (*LogFile, error) {
@@ -19,16 +22,53 @@ func NewLogFile(filename string) (*LogFile, error) {
 	}
 
 	return &LogFile{
-		File:    f,
-		Scanner: bufio.NewScanner(f),
+		File:     f,
+		Reader:   bufio.NewReader(f),
+		fileName: filename,
 	}, nil
 }
 
-func (l *LogFile) readOldEvents(ctx context.Context, events chan<- string, errs chan<- error) {
+func (l *LogFile) ReadOldEvents(events chan<- string, errs chan<- error, done chan<- struct{}) {
+	for {
+		line, err := l.Reader.ReadString('\n')
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
 
+			errs <- err //todo wrap
+			break
+		}
+
+		events <- fmt.Sprintf("%s read ReadOldEvents() from %s", line, l.fileName)
+	}
+
+	done <- struct{}{}
 }
 
-func (l *LogFile) readNewEvents(ctx context.Context, events chan<- string, errs chan<- error) {
+func (l *LogFile) ReadNewEvents(
+	ctx context.Context, events chan<- string, errs chan<- error, freq int) {
 	defer l.File.Close()
 
+	ticker := time.NewTicker(time.Duration(freq) * time.Second)
+
+	for {
+		select {
+		case <-ctx.Done():
+			errs <- ctx.Err()
+		case <-ticker.C:
+			line, err := l.Reader.ReadString('\n')
+
+			if err != nil {
+				if err == io.EOF {
+					continue
+				}
+
+				errs <- err //todo wrap
+				return
+			}
+
+			events <- fmt.Sprintf("%s read ReadNewEvents() from %s", line, l.fileName)
+		}
+	}
 }

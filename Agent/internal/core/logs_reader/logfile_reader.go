@@ -34,4 +34,5 @@ func NewLogsReader(logfiles []string) (*LogFileReader, error) {
 	// 	done:     make(chan int),
 	// 	logFiles: lgf,
 	// }, nil
+	return &LogFileReader{}, nil
 }
