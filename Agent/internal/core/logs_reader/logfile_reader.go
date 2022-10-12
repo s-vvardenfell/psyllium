@@ -1,38 +1,94 @@
 package logs_reader
 
-import "errors"
+import (
+	"context"
+	"errors"
+	"fmt"
+	"time"
+)
 
 var (
-	ErrLogFileListEmpty = errors.New("log file list is empty")
-	chanCap             = 0
+	ErrLogFileListEmpty               = errors.New("log file list is empty")
+	resChanCap                        = 100
+	evChanCap                         = 0
+	deadLine            time.Duration = 60
+	freq                              = 3
 )
 
 type LogFileReader struct {
+	results  chan string
 	events   chan string
 	errors   chan error
-	done     chan int
+	done     chan struct{}
 	logFiles []LogFile
 }
 
-func NewLogsReader(logfiles []string) (*LogFileReader, error) {
-	// if len(logfiles) == 0 {
-	// 	return nil, ErrLogFileListEmpty
-	// }
+func NewLogsReader(files []string) (*LogFileReader, error) {
+	if len(files) == 0 {
+		return nil, ErrLogFileListEmpty
+	}
 
-	// lgf := make([]LogFile, 0, len(logfiles))
+	lgfs := make([]LogFile, 0, len(files))
 
-	// for i := range logfiles {
-	// 	lgf = append(lgf, LogFile{
-	// 		FileName: logfiles[i],
-	// 	})
-	// }
+	for i := range files {
+		lf, err := NewLogFile(files[i])
+		if err != nil {
+			return nil, fmt.Errorf("cannot create LogFile with file %s; %w", files[i], err)
+		}
 
-	// return &LogFileReader{
-	// 	// events:   make(chan<- core.Event, chanCap),
-	// 	events:   make(chan string, chanCap),
-	// 	errors:   make(chan error),
-	// 	done:     make(chan int),
-	// 	logFiles: lgf,
-	// }, nil
-	return &LogFileReader{}, nil
+		lgfs = append(lgfs, *lf)
+	}
+
+	return &LogFileReader{
+		results:  make(chan string, resChanCap),
+		events:   make(chan string, evChanCap),
+		errors:   make(chan error),
+		done:     make(chan struct{}),
+		logFiles: lgfs,
+	}, nil
+}
+
+func (l *LogFileReader) Work() <-chan string {
+	for i := range l.logFiles {
+		go func(i int) {
+			l.logFiles[i].ReadOldEvents(l.events, l.errors, l.done)
+		}(i)
+	}
+
+	cnt := len(l.logFiles)
+
+	for cnt != 0 {
+		select {
+		case event := <-l.events:
+			fmt.Println(event)
+			l.results <- event
+		case err := <-l.errors:
+			fmt.Println(err) //todo
+		case <-l.done:
+			cnt--
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), deadLine*time.Second)
+	defer cancel()
+
+	for i := range l.logFiles {
+		go func(i int) {
+			l.logFiles[i].ReadNewEvents(ctx, l.events, l.errors, freq)
+		}(i)
+	}
+
+loop:
+	for {
+		select {
+		case event := <-l.events:
+			fmt.Println(event)
+			l.results <- event
+		case err := <-l.errors:
+			fmt.Println(err) //todo
+			break loop
+		}
+	}
+
+	return l.results
 }

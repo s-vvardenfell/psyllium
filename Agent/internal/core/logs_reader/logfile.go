@@ -28,6 +28,8 @@ func NewLogFile(filename string) (*LogFile, error) {
 	}, nil
 }
 
+// ReadOldEvents reads file contents line by line and send result and error to channels;
+// stops when file is completely read
 func (l *LogFile) ReadOldEvents(events chan<- string, errs chan<- error, done chan<- struct{}) {
 	for {
 		line, err := l.Reader.ReadString('\n')
@@ -46,6 +48,8 @@ func (l *LogFile) ReadOldEvents(events chan<- string, errs chan<- error, done ch
 	done <- struct{}{}
 }
 
+// ReadNewEvents read new lines in file and send result and error to channels;
+// stops if context is done or error occurs
 func (l *LogFile) ReadNewEvents(
 	ctx context.Context, events chan<- string, errs chan<- error, freq int) {
 	defer l.File.Close()

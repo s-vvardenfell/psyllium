@@ -47,7 +47,7 @@ func (l *LogFile) readNewEvents(ctx context.Context, events chan<- string, errs 
 
 	rd := bufio.NewReader(l.File)
 	// rd.Reset(l.File)
-	ticker := time.NewTicker(time.Duration(freq) * time.Second)
+	ticker := time.NewTicker(5 * time.Second)
 
 	for {
 		select {

@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	logfile = "../../../test/test_log.log"
-	freq    = 3
+	logfile   = "../../../test/test_log.log"
+	freq_test = 3
 )
 
 func Test_ReadOldEvents(t *testing.T) {
@@ -55,7 +55,7 @@ func Test_ReadNewEvents(t *testing.T) {
 	defer close(events)
 	defer close(errors)
 
-	go lf.ReadNewEvents(ctx, events, errors, freq)
+	go lf.ReadNewEvents(ctx, events, errors, freq_test)
 
 loop:
 	for {
