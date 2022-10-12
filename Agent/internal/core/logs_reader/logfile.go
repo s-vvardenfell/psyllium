@@ -36,7 +36,7 @@ func (l *LogFile) ReadOldEvents(events chan<- string, errs chan<- error, done ch
 				break
 			}
 
-			errs <- err //todo wrap
+			errs <- fmt.Errorf("error while reading file in ReadOldEvents, %w", err)
 			break
 		}
 
@@ -64,7 +64,7 @@ func (l *LogFile) ReadNewEvents(
 					continue
 				}
 
-				errs <- err //todo wrap
+				errs <- fmt.Errorf("error while reading file in ReadNewEvents, %w", err)
 				return
 			}
 
