@@ -17,7 +17,7 @@ func Test_ReadOldEvents(t *testing.T) {
 	lf, err := NewLogFile(logfile)
 	require.NoError(t, err)
 
-	events := make(chan string)
+	events := make(chan Event)
 	errors := make(chan error)
 	done := make(chan struct{})
 
@@ -30,12 +30,14 @@ func Test_ReadOldEvents(t *testing.T) {
 
 	cnt := 1
 
+loop:
 	for cnt != 0 {
 		select {
 		case event := <-events:
 			require.NotEmpty(t, event)
 		case err := <-errors:
 			require.NoError(t, err)
+			break loop
 		case <-done:
 			cnt--
 		}
@@ -49,7 +51,7 @@ func Test_ReadNewEvents(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	events := make(chan string)
+	events := make(chan Event)
 	errors := make(chan error)
 
 	defer close(events)

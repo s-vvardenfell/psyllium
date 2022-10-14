@@ -9,7 +9,6 @@ import (
 
 const (
 	chanCap = 0
-	freq    = 3
 )
 
 var (

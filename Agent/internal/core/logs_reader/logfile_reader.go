@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -16,8 +18,8 @@ var (
 )
 
 type LogFileReader struct {
-	results  chan string
-	events   chan string
+	results  chan Event
+	events   chan Event
 	errors   chan error
 	done     chan struct{}
 	logFiles []LogFile
@@ -40,15 +42,15 @@ func NewLogsReader(files []string) (*LogFileReader, error) {
 	}
 
 	return &LogFileReader{
-		results:  make(chan string, resChanCap),
-		events:   make(chan string, evChanCap),
+		results:  make(chan Event, resChanCap),
+		events:   make(chan Event, evChanCap),
 		errors:   make(chan error),
 		done:     make(chan struct{}),
 		logFiles: lgfs,
 	}, nil
 }
 
-func (l *LogFileReader) Work() <-chan string {
+func (l *LogFileReader) Work() <-chan Event {
 	for i := range l.logFiles {
 		go func(i int) {
 			l.logFiles[i].ReadOldEvents(l.events, l.errors, l.done)
@@ -57,13 +59,14 @@ func (l *LogFileReader) Work() <-chan string {
 
 	cnt := len(l.logFiles)
 
+loop1:
 	for cnt != 0 {
 		select {
 		case event := <-l.events:
-			fmt.Println(event)
 			l.results <- event
 		case err := <-l.errors:
-			fmt.Println(err) //todo
+			logrus.Error(err)
+			break loop1
 		case <-l.done:
 			cnt--
 		}
@@ -78,15 +81,14 @@ func (l *LogFileReader) Work() <-chan string {
 		}(i)
 	}
 
-loop:
+loop2:
 	for {
 		select {
 		case event := <-l.events:
-			fmt.Println(event)
 			l.results <- event
 		case err := <-l.errors:
-			fmt.Println(err) //todo
-			break loop
+			logrus.Error(err)
+			break loop2
 		}
 	}
 

@@ -9,6 +9,12 @@ import (
 	"time"
 )
 
+type Event struct {
+	FileName string `json:"filename"`
+	Event    string `json:"event"`
+	Ts       int64  `json:"ts"`
+}
+
 type LogFile struct {
 	File     *os.File
 	Reader   *bufio.Reader
@@ -30,7 +36,7 @@ func NewLogFile(filename string) (*LogFile, error) {
 
 // ReadOldEvents reads file contents line by line and send result and error to channels;
 // stops when file is completely read
-func (l *LogFile) ReadOldEvents(events chan<- string, errs chan<- error, done chan<- struct{}) {
+func (l *LogFile) ReadOldEvents(events chan<- Event, errs chan<- error, done chan<- struct{}) {
 	for {
 		line, err := l.Reader.ReadString('\n')
 		if err != nil {
@@ -42,7 +48,7 @@ func (l *LogFile) ReadOldEvents(events chan<- string, errs chan<- error, done ch
 			break
 		}
 
-		events <- fmt.Sprintf("%s read ReadOldEvents() from %s", line, l.fileName)
+		events <- Event{l.fileName, line, time.Now().Unix()}
 	}
 
 	done <- struct{}{}
@@ -51,7 +57,7 @@ func (l *LogFile) ReadOldEvents(events chan<- string, errs chan<- error, done ch
 // ReadNewEvents read new lines in file and send result and error to channels;
 // stops if context is done or error occurs
 func (l *LogFile) ReadNewEvents(
-	ctx context.Context, events chan<- string, errs chan<- error, freq int) {
+	ctx context.Context, events chan<- Event, errs chan<- error, freq int) {
 	defer l.File.Close()
 
 	ticker := time.NewTicker(time.Duration(freq) * time.Second)
@@ -72,7 +78,7 @@ func (l *LogFile) ReadNewEvents(
 				return
 			}
 
-			events <- fmt.Sprintf("%s read ReadNewEvents() from %s", line, l.fileName)
+			events <- Event{l.fileName, line, time.Now().Unix()}
 		}
 	}
 }
