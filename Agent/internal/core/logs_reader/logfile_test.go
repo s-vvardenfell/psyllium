@@ -1,6 +1,7 @@
 package logs_reader
 
 import (
+	"agent/internal/core"
 	"context"
 	"testing"
 	"time"
@@ -17,7 +18,7 @@ func Test_ReadOldEvents(t *testing.T) {
 	lf, err := NewLogFile(logfile)
 	require.NoError(t, err)
 
-	events := make(chan Event)
+	events := make(chan core.Event)
 	errors := make(chan error)
 	done := make(chan struct{})
 
@@ -51,7 +52,7 @@ func Test_ReadNewEvents(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	events := make(chan Event)
+	events := make(chan core.Event)
 	errors := make(chan error)
 
 	defer close(events)

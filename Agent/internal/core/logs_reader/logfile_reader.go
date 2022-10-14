@@ -1,6 +1,7 @@
 package logs_reader
 
 import (
+	"agent/internal/core"
 	"context"
 	"errors"
 	"fmt"
@@ -18,8 +19,8 @@ var (
 )
 
 type LogFileReader struct {
-	results  chan Event
-	events   chan Event
+	results  chan core.Event
+	events   chan core.Event
 	errors   chan error
 	done     chan struct{}
 	logFiles []LogFile
@@ -42,15 +43,15 @@ func NewLogsReader(files []string) (*LogFileReader, error) {
 	}
 
 	return &LogFileReader{
-		results:  make(chan Event, resChanCap),
-		events:   make(chan Event, evChanCap),
+		results:  make(chan core.Event, resChanCap),
+		events:   make(chan core.Event, evChanCap),
 		errors:   make(chan error),
 		done:     make(chan struct{}),
 		logFiles: lgfs,
 	}, nil
 }
 
-func (l *LogFileReader) Work() <-chan Event {
+func (l *LogFileReader) Work() <-chan core.Event {
 	for i := range l.logFiles {
 		go func(i int) {
 			l.logFiles[i].ReadOldEvents(l.events, l.errors, l.done)

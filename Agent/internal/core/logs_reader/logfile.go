@@ -1,6 +1,7 @@
 package logs_reader
 
 import (
+	"agent/internal/core"
 	"bufio"
 	"context"
 	"fmt"
@@ -8,12 +9,6 @@ import (
 	"os"
 	"time"
 )
-
-type Event struct {
-	FileName string `json:"filename"`
-	Event    string `json:"event"`
-	Ts       int64  `json:"ts"`
-}
 
 type LogFile struct {
 	File     *os.File
@@ -36,7 +31,7 @@ func NewLogFile(filename string) (*LogFile, error) {
 
 // ReadOldEvents reads file contents line by line and send result and error to channels;
 // stops when file is completely read
-func (l *LogFile) ReadOldEvents(events chan<- Event, errs chan<- error, done chan<- struct{}) {
+func (l *LogFile) ReadOldEvents(events chan<- core.Event, errs chan<- error, done chan<- struct{}) {
 	for {
 		line, err := l.Reader.ReadString('\n')
 		if err != nil {
@@ -48,7 +43,7 @@ func (l *LogFile) ReadOldEvents(events chan<- Event, errs chan<- error, done cha
 			break
 		}
 
-		events <- Event{l.fileName, line, time.Now().Unix()}
+		events <- core.Event{FileName: l.fileName, Event: line, Ts: time.Now().Unix()}
 	}
 
 	done <- struct{}{}
@@ -57,7 +52,7 @@ func (l *LogFile) ReadOldEvents(events chan<- Event, errs chan<- error, done cha
 // ReadNewEvents read new lines in file and send result and error to channels;
 // stops if context is done or error occurs
 func (l *LogFile) ReadNewEvents(
-	ctx context.Context, events chan<- Event, errs chan<- error, freq int) {
+	ctx context.Context, events chan<- core.Event, errs chan<- error, freq int) {
 	defer l.File.Close()
 
 	ticker := time.NewTicker(time.Duration(freq) * time.Second)
@@ -78,7 +73,7 @@ func (l *LogFile) ReadNewEvents(
 				return
 			}
 
-			events <- Event{l.fileName, line, time.Now().Unix()}
+			events <- core.Event{FileName: l.fileName, Event: line, Ts: time.Now().Unix()}
 		}
 	}
 }
