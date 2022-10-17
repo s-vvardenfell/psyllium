@@ -1,25 +1,40 @@
 package main
 
 import (
-	"agent/internal/core/logs_reader"
 	"fmt"
-	"log"
 )
 
+type HostInfo struct {
+	OS       string
+	Host     string `env:"HOST"`
+	Home     string `env:"HOME"`
+	Username string `env:"USERNAME"`
+	Shell    string `env:"SHELL"`
+	Term     string `env:"TERM"`
+}
+
 func main() {
+	cfg := HostInfo{}
+	// if err := env.Parse(&cfg); err != nil {
+	// 	fmt.Printf("%+v\n", err)
+	// }
+
+	fmt.Printf("%+v\n", cfg)
+
 	// cmd.Execute()
-	logs := []string{"test/file1.log", "test/file2.log"}
 
-	lr, err := logs_reader.NewLogsReader(logs)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// logs := []string{"test/file1.log", "test/file2.log"}
 
-	res := lr.Work()
+	// lr, err := logs_reader.NewLogsReader(logs)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	for r := range res {
-		fmt.Println(r)
-	}
+	// res := lr.Work()
+
+	// for r := range res {
+	// 	fmt.Println(r)
+	// }
 
 	// 	l1, err := logs_reader.NewLogFile(logs[0])
 	// 	if err != nil {
