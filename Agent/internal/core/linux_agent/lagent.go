@@ -23,7 +23,7 @@ func readLogFile() {
 func (l *LinuxAgent) GetEvents() {
 	fmt.Println(l.msg)
 
-	return
+	// return
 }
 
 // func (l *LinuxAgent) Err() <-chan error {

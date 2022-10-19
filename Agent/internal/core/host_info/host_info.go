@@ -41,6 +41,7 @@ func GetHostInfo(ctx context.Context) (*HostInfo, error) {
 			if err != nil {
 				return nil, err
 			}
+
 			inf.Host = host
 		}
 
@@ -52,8 +53,10 @@ func GetHostInfo(ctx context.Context) (*HostInfo, error) {
 
 // host_info.GetHostInfo, 1, 1, 5*time.Second, cached - TODO - descr
 func Throttle(e Effector, max uint, refill uint, d time.Duration, cached *HostInfo) Effector {
-	var tokens = max
-	var once sync.Once
+	var (
+		tokens = max
+		once   sync.Once
+	)
 
 	return func(ctx context.Context) (*HostInfo, error) {
 		if ctx.Err() != nil {

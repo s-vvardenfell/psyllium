@@ -13,7 +13,7 @@ import (
 type LogFile struct {
 	File     *os.File
 	Reader   *bufio.Reader
-	fileName string //for dev p-s, will be removed
+	fileName string // for dev p-s, will be removed
 }
 
 func NewLogFile(filename string) (*LogFile, error) {
@@ -40,6 +40,7 @@ func (l *LogFile) ReadOldEvents(events chan<- core.Event, errs chan<- error, don
 			}
 
 			errs <- fmt.Errorf("error while reading file in ReadOldEvents, %w", err)
+
 			break
 		}
 
@@ -70,6 +71,7 @@ func (l *LogFile) ReadNewEvents(
 				}
 
 				errs <- fmt.Errorf("error while reading file in ReadNewEvents, %w", err)
+
 				return
 			}
 

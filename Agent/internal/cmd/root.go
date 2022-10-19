@@ -91,5 +91,6 @@ func ConfigureLogrus() {
 	if cnfg.Logrus.ToJson {
 		logrus.SetFormatter(&logrus.JSONFormatter{})
 	}
+
 	logrus.SetLevel(logrus.Level(cnfg.Logrus.LogLvl))
 }

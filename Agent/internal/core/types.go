@@ -9,7 +9,7 @@ type Event struct {
 type HostData struct {
 	HostName string `json:"hostname"`
 	Os       string `json:"os"`
-	//TODO ETC
+	// TODO ETC
 }
 
 type EventsChunk struct {
