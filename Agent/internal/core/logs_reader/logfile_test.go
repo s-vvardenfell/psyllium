@@ -27,7 +27,7 @@ func Test_ReadOldEvents(t *testing.T) {
 	defer close(done)
 	defer lf.File.Close()
 
-	go lf.ReadOldEvents(events, errors, done)
+	go lf.ReadOldEvents(events, done, errors)
 
 	cnt := 1
 

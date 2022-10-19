@@ -31,7 +31,7 @@ func NewLogFile(filename string) (*LogFile, error) {
 
 // ReadOldEvents reads file contents line by line and send result and error to channels;
 // stops when file is completely read
-func (l *LogFile) ReadOldEvents(events chan<- core.Event, errs chan<- error, done chan<- struct{}) {
+func (l *LogFile) ReadOldEvents(events chan<- core.Event, done chan<- struct{}, errs chan<- error) {
 	for {
 		line, err := l.Reader.ReadString('\n')
 		if err != nil {
@@ -40,11 +40,10 @@ func (l *LogFile) ReadOldEvents(events chan<- core.Event, errs chan<- error, don
 			}
 
 			errs <- fmt.Errorf("error while reading file in ReadOldEvents, %w", err)
-
 			break
 		}
 
-		events <- core.Event{FileName: l.fileName, Event: line, Ts: time.Now().Unix()}
+		events <- core.Event{FileName: l.fileName, Event: line[:len(line)-1], Ts: time.Now().Unix()}
 	}
 
 	done <- struct{}{}
