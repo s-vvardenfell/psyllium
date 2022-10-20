@@ -4,7 +4,6 @@ go 1.19
 
 require (
 	github.com/caarlos0/env v3.5.0+incompatible
-	github.com/caarlos0/env/v6 v6.10.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.13.0

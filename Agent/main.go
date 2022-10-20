@@ -1,41 +1,47 @@
 package main
 
 import (
-	"agent/internal/core"
 	"agent/internal/core/logs_reader"
 	"fmt"
-	"log"
+
+	"github.com/sirupsen/logrus"
 )
 
 var files = []string{"test/file1.log", "test/file2.log"}
 
 func main() {
 	fmt.Println("works!")
-	lfr, err := logs_reader.NewLogsReader(files)
+
+	err := logs_reader.ReadLog("test/auth.log", "", 100)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Error(err)
 	}
 
-	events := make(chan core.Event)
-	errors := make(chan error)
-	done := make(chan struct{})
+	// 	lfr, err := logs_reader.NewLogsReader(files)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
 
-	lfr.Work(events, done, errors)
+	// 	events := make(chan core.Event)
+	// 	errors := make(chan error)
+	// 	done := make(chan struct{})
 
-	l := len(files)
+	// 	lfr.Work(events, done, errors)
 
-loop:
-	for l != 0 {
-		select {
-		case ev := <-events:
-			fmt.Println(ev)
-		case err := <-errors:
-			fmt.Println(err)
-			break loop
-		case <-done:
-			l--
-			fmt.Println("DONE")
-		}
-	}
+	// 	l := len(files)
 
+	// loop:
+	//
+	//	for l != 0 {
+	//		select {
+	//		case ev := <-events:
+	//			fmt.Println(ev)
+	//		case err := <-errors:
+	//			fmt.Println(err)
+	//			break loop
+	//		case <-done:
+	//			l--
+	//			fmt.Println("DONE")
+	//		}
+	//	}
 }
