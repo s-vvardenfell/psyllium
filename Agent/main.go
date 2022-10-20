@@ -3,19 +3,31 @@ package main
 import (
 	"agent/internal/core/logs_reader"
 	"fmt"
-
-	"github.com/sirupsen/logrus"
 )
 
-var files = []string{"test/file1.log", "test/file2.log"}
+var data = "gdm-launch-environment]: pam_unix(gdm-launch-environment:session): session opened for user gdm(uid=127) by (uid=0)"
 
 func main() {
-	fmt.Println("works!")
+	// fmt.Println("works!")
 
-	err := logs_reader.ReadLog("test/auth.log", "", 100)
-	if err != nil {
-		logrus.Error(err)
+	lm := logs_reader.NewLogReader("test/auth.log")
+	go lm.ReadLog(logs_reader.FormatSysLog, 0)
+
+loop:
+	for {
+		select {
+		case ev := <-lm.Events:
+			fmt.Println(ev)
+		case err := <-lm.Errors:
+			fmt.Println("Error!")
+			fmt.Println(err)
+		case <-lm.Done:
+			fmt.Print("DONE!")
+			break loop
+		}
 	}
+
+	///////////////////////
 
 	// 	lfr, err := logs_reader.NewLogsReader(files)
 	// 	if err != nil {

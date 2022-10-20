@@ -6,16 +6,11 @@ import (
 	"io"
 	"os"
 	"regexp"
-	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 var (
 	authLog = regexp.MustCompile(
 		`([\w]{3,4}\s[\d]{2}\s[\d]{2}:[\d]{2}:[\d]{2}) ([\w|\d|-]{1,40}) (.+)`)
-
-	authLogEvent = regexp.MustCompile(`([\w|\d|_|-]){1,20}:(.+)`)
 )
 
 type Event struct {
@@ -25,13 +20,32 @@ type Event struct {
 	Msg      string
 }
 
-// ReadLog reads given 'filename' line by line, parse its lines according to
-// specified 'format'; can discard results that has timestamp less than 'since'
-func ReadLog(filename string, format string, since int) error {
-	f, err := os.Open(filename)
-	if err != nil {
-		return fmt.Errorf("cannot create NewLogFile, %w", err)
+type LogReader struct {
+	filename string
+	Events   chan *Event
+	Errors   chan error
+	Done     chan struct{}
+}
+
+// TODO передать в конструктор LogReader'у каналы для отправки
+// ведь LogReader отвечает за 1 файл
+func NewLogReader(filename string) *LogReader {
+	return &LogReader{
+		filename: filename,
+		Events:   make(chan *Event),
+		Errors:   make(chan error),
+		Done:     make(chan struct{}),
 	}
+}
+
+// ReadLog reads given 'filename' line by line, parse its lines according to
+// specified 'Formatter'; can discard results that has timestamp less than 'since'
+func (lr *LogReader) ReadLog(format Formatter, since int64) {
+	f, err := os.Open(lr.filename)
+	if err != nil {
+		lr.Errors <- fmt.Errorf("cannot create NewLogFile, %w", err)
+	}
+	defer f.Close()
 
 	r := bufio.NewReader(f)
 
@@ -42,43 +56,21 @@ func ReadLog(filename string, format string, since int) error {
 				break
 			}
 
+			lr.Errors <- err
 			break
 		}
 
-		// TODO FORMATTER FUNC/INTERFACE
-		// parse event
-		// parse all res-s to str
-		// discard old ones
-		match := authLog.FindStringSubmatch(line)
-		if match == nil {
-			return fmt.Errorf("failed to parse log str <%s> by FindAllString", line) //todo json-log
-		}
-
-		dt := match[1] // todo check
-		host := match[2]
-		data := match[3]
-
-		match = authLogEvent.FindStringSubmatch(line)
-		if match == nil {
-			return fmt.Errorf("failed to parse log str <%s> by FindAllString", line) //todo json-log
-		}
-
-		udt, err := time.Parse("Jan 02 15:04:05", dt)
+		e, err := format(line)
 		if err != nil {
-			logrus.Errorf("cannot parse time, %v", err) //todo send err to chan
-		}
-		udt = udt.AddDate(time.Now().Year(), 0, 0)
-
-		e := Event{
-			DateTime: udt.Unix(),
-			Host:     host,
-			Process:  match[1],
-			Msg:      match[2],
+			lr.Errors <- fmt.Errorf("cannot format event, %w", err)
 		}
 
-		fmt.Printf("%#v\n\n", e)
+		if e.DateTime < since {
+			continue
+		}
 
+		lr.Events <- e
 	}
 
-	return nil
+	lr.Done <- struct{}{}
 }
