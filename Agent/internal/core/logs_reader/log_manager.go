@@ -12,8 +12,10 @@ import (
 )
 
 var (
-	authLogFormat = regexp.MustCompile(
+	authLog = regexp.MustCompile(
 		`([\w]{3,4}\s[\d]{2}\s[\d]{2}:[\d]{2}:[\d]{2}) ([\w|\d|-]{1,40}) (.+)`)
+
+	authLogEvent = regexp.MustCompile(`([\w|\d|_|-]){1,20}:(.+)`)
 )
 
 type Event struct {
@@ -47,14 +49,19 @@ func ReadLog(filename string, format string, since int) error {
 		// parse event
 		// parse all res-s to str
 		// discard old ones
-		match := authLogFormat.FindStringSubmatch(line)
+		match := authLog.FindStringSubmatch(line)
 		if match == nil {
 			return fmt.Errorf("failed to parse log str <%s> by FindAllString", line) //todo json-log
 		}
 
 		dt := match[1] // todo check
 		host := match[2]
-		msg := match[3]
+		data := match[3]
+
+		match = authLogEvent.FindStringSubmatch(line)
+		if match == nil {
+			return fmt.Errorf("failed to parse log str <%s> by FindAllString", line) //todo json-log
+		}
 
 		udt, err := time.Parse("Jan 02 15:04:05", dt)
 		if err != nil {
@@ -65,8 +72,8 @@ func ReadLog(filename string, format string, since int) error {
 		e := Event{
 			DateTime: udt.Unix(),
 			Host:     host,
-			Process:  msg,
-			Msg:      "no",
+			Process:  match[1],
+			Msg:      match[2],
 		}
 
 		fmt.Printf("%#v\n\n", e)
