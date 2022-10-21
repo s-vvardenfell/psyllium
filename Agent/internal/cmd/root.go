@@ -1,11 +1,15 @@
 package cmd
 
 import (
+	"agent/internal/core"
+	"agent/internal/core/linux_agent"
+	"agent/internal/core/windows_agent"
 	"agent/pkg/types"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -26,7 +30,26 @@ var rootCmd = &cobra.Command{
 		// ss := somepackage.New(&cnfg, d)
 		// ss.Work()
 
+		fmt.Println(cnfg)
+
 		fmt.Println("Agent works!")
+
+		os := runtime.GOOS
+
+		c := core.NewCore()
+		var a core.Agent
+
+		if os == "linux" {
+			a = linux_agent.NewLinuxAgent()
+		} else if os == "windows" {
+			a = windows_agent.NewWindowsAgent()
+		}
+
+		// тоже сделать для ключей-фронта: запуск фронта с ядром
+
+		if err := c.WithAgent(a).Start(); err != nil {
+			logrus.Fatal(err)
+		}
 	},
 }
 

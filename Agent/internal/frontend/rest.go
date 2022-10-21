@@ -7,6 +7,6 @@ type restFrontEnd struct {
 }
 
 func (r restFrontEnd) StartWith(c *core.Core) error {
-	c.Agent.GetEvents()
+	c.Agent.Run()
 	return nil
 }
