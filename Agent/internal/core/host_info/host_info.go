@@ -1,6 +1,7 @@
 package host_info
 
 import (
+	"agent/internal/core"
 	"context"
 	"errors"
 	"os"
@@ -15,31 +16,20 @@ var (
 	ErrReturnedCached = errors.New("returned cached value")
 )
 
-type Effector func(context.Context) (*HostInfo, error)
-
-type HostInfo struct {
-	OS       string
-	Host     string `env:"HOSTNAME"`
-	Home     string `env:"HOME"`
-	Username string `env:"USERNAME"`
-	Shell    string `env:"SHELL"`
-	Term     string `env:"TERM"`
-}
-
-func GetHostInfo(ctx context.Context) (*HostInfo, error) {
+func GetHostInfo(ctx context.Context) (core.HostInfo, error) {
 	select {
 	case <-ctx.Done():
-		return nil, ctx.Err()
+		return core.HostInfo{}, ctx.Err()
 	default:
-		inf := HostInfo{}
+		inf := core.HostInfo{}
 		if err := env.Parse(&inf); err != nil {
-			return nil, err
+			return core.HostInfo{}, err
 		}
 
 		if inf.Host == "" {
 			host, err := os.Hostname()
 			if err != nil {
-				return nil, err
+				return core.HostInfo{}, err
 			}
 
 			inf.Host = host
@@ -47,18 +37,19 @@ func GetHostInfo(ctx context.Context) (*HostInfo, error) {
 
 		inf.OS = runtime.GOOS
 
-		return &inf, nil
+		return inf, nil
 	}
 }
 
 // host_info.GetHostInfo, 1, 1, 5*time.Second, cached - TODO - descr
-func Throttle(e Effector, max uint, refill uint, d time.Duration, cached *HostInfo) Effector {
+func Throttle(
+	e core.Effector, max uint, refill uint, d time.Duration, cached *core.HostInfo) core.Effector {
 	var (
 		tokens = max
 		once   sync.Once
 	)
 
-	return func(ctx context.Context) (*HostInfo, error) {
+	return func(ctx context.Context) (*core.HostInfo, error) {
 		if ctx.Err() != nil {
 			return nil, ctx.Err()
 		}

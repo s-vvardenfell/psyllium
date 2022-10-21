@@ -1,6 +1,7 @@
 package logs_reader
 
 import (
+	"agent/internal/core"
 	"bufio"
 	"fmt"
 	"io"
@@ -13,26 +14,19 @@ var (
 		`([\w]{3,4}\s[\d]{2}\s[\d]{2}:[\d]{2}:[\d]{2}) ([\w|\d|-]{1,40}) (.+)`)
 )
 
-type Event struct {
-	DateTime int64
-	Host     string
-	Process  string
-	Msg      string
-}
-
-type LogReader struct {
+type LogsReader struct {
 	filename string
-	Events   chan *Event
+	Events   chan *core.Event
 	Errors   chan error
 	Done     chan struct{}
 }
 
 // TODO передать в конструктор LogReader'у каналы для отправки
 // ведь LogReader отвечает за 1 файл
-func NewLogReader(filename string) *LogReader {
-	return &LogReader{
+func NewLogsReader(filename string) *LogsReader {
+	return &LogsReader{
 		filename: filename,
-		Events:   make(chan *Event),
+		Events:   make(chan *core.Event),
 		Errors:   make(chan error),
 		Done:     make(chan struct{}),
 	}
@@ -40,7 +34,7 @@ func NewLogReader(filename string) *LogReader {
 
 // ReadLog reads given 'filename' line by line, parse its lines according to
 // specified 'Formatter'; can discard results that has timestamp less than 'since'
-func (lr *LogReader) ReadLog(format Formatter, since int64) {
+func (lr *LogsReader) ReadLog(format core.Formatter, since int64) {
 	f, err := os.Open(lr.filename)
 	if err != nil {
 		lr.Errors <- fmt.Errorf("cannot create NewLogFile, %w", err)

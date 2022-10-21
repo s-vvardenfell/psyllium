@@ -1,31 +1,64 @@
 package main
 
 import (
-	"agent/internal/core/logs_reader"
+	"agent/internal/core"
+	"agent/internal/core/host_info"
+	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 )
-
-var data = "gdm-launch-environment]: pam_unix(gdm-launch-environment:session): session opened for user gdm(uid=127) by (uid=0)"
 
 func main() {
 	// fmt.Println("works!")
 
-	lm := logs_reader.NewLogReader("test/auth.log")
-	go lm.ReadLog(logs_reader.FormatSysLog, 0)
-
-loop:
-	for {
-		select {
-		case ev := <-lm.Events:
-			fmt.Println(ev)
-		case err := <-lm.Errors:
-			fmt.Println("Error!")
-			fmt.Println(err)
-		case <-lm.Done:
-			fmt.Print("DONE!")
-			break loop
-		}
+	h, err := host_info.GetHostInfo(context.Background())
+	if err != nil {
+		log.Fatal(err)
 	}
+	// fmt.Printf("%#v\n", h)
+
+	e1 := core.Event{
+		DateTime: 12345,
+		Host:     "localhost",
+		Process:  "angryMalvare",
+		Msg:      "preparing to encryption...",
+	}
+
+	e2 := core.Event{
+		DateTime: 12346,
+		Host:     "localhost",
+		Process:  "angryMalvare",
+		Msg:      "start encryption...",
+	}
+
+	m := core.Msg{
+		HostInfo: h,
+		Events:   []core.Event{e1, e2},
+	}
+
+	res, err := json.Marshal(&m)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(res))
+
+	// 	lm := logs_reader.NewLogsReader("test/auth.log")
+	// 	go lm.ReadLog(logs_reader.FormatSysLog, 0)
+
+	// loop:
+	// 	for {
+	// 		select {
+	// 		case ev := <-lm.Events:
+	// 			fmt.Println(ev)
+	// 		case err := <-lm.Errors:
+	// 			fmt.Println("Error!")
+	// 			fmt.Println(err)
+	// 		case <-lm.Done:
+	// 			fmt.Print("DONE!")
+	// 			break loop
+	// 		}
+	// 	}
 
 	///////////////////////
 

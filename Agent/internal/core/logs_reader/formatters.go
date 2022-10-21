@@ -1,14 +1,13 @@
 package logs_reader
 
 import (
+	"agent/internal/core"
 	"fmt"
 	"strings"
 	"time"
 )
 
-type Formatter func(event string) (*Event, error)
-
-func FormatSysLog(event string) (*Event, error) {
+func FormatSysLog(event string) (*core.Event, error) {
 	match := authLog.FindStringSubmatch(event)
 	if match == nil || len(match) < 3 {
 		return nil, fmt.Errorf("failed to process log event <%s>", event) //todo json-log
@@ -29,7 +28,7 @@ func FormatSysLog(event string) (*Event, error) {
 
 	events := strings.Split(data, ": ")
 
-	return &Event{
+	return &core.Event{
 		DateTime: udt.Unix(),
 		Host:     host,
 		Process:  events[0],

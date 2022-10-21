@@ -1,18 +1,28 @@
 package core
 
+import "context"
+
+type Effector func(context.Context) (*HostInfo, error)
+
+type Formatter func(event string) (*Event, error)
+
+type HostInfo struct {
+	OS       string `json:"os"`
+	Host     string `env:"HOSTNAME" json:"host"`
+	Home     string `env:"HOME" json:"home"`
+	Username string `env:"USERNAME" json:"uname"`
+	Shell    string `env:"SHELL" json:"shell"`
+	Term     string `env:"TERM" json:"term"`
+}
+
 type Event struct {
-	FileName string `json:"filename"`
-	Event    string `json:"event"`
-	Ts       int64  `json:"ts"`
+	DateTime int64  `json:"event_dt"`
+	Host     string `json:"host"`
+	Process  string `json:"process"`
+	Msg      string `json:"msg"`
 }
 
-type HostData struct {
-	HostName string `json:"hostname"`
-	Os       string `json:"os"`
-	// TODO ETC
-}
-
-type EventsChunk struct {
-	HostData HostData `json:"host"`
-	Event    []Event  `json:"events"`
+type Msg struct {
+	HostInfo HostInfo `json:"hostinfo"`
+	Events   []Event  `json:"events"`
 }
