@@ -16,7 +16,7 @@ func NewLinuxAgent() core.Agent {
 	}
 }
 
-func readLogFile() {
+func (l *LinuxAgent) Run() {
 
 }
 

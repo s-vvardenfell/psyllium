@@ -14,7 +14,7 @@ func NewWindowsAgent() *WindowsAgent {
 	}
 }
 
-func (l *WindowsAgent) GetEvents() {
+func (l *WindowsAgent) Run() {
 	fmt.Println(l.msg)
 	// return
 }
