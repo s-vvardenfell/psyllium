@@ -10,7 +10,7 @@ type LinuxAgent struct {
 
 }
 
-func NewLinuxAgent(logfiles []string) core.Agent {
+func NewLinuxAgent() core.Agent {
 	return &LinuxAgent{
 		msg: "LinuxAgent works!",
 	}
@@ -25,7 +25,3 @@ func (l *LinuxAgent) GetEvents() {
 
 	// return
 }
-
-// func (l *LinuxAgent) Err() <-chan error {
-// 	return
-// }

@@ -1,47 +1,30 @@
 package main
 
 import (
-	"agent/internal/core"
-	"agent/internal/core/host_info"
-	"context"
-	"encoding/json"
 	"fmt"
-	"log"
+	"go/types"
+	"os"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func main() {
 	// fmt.Println("works!")
 
-	h, err := host_info.GetHostInfo(context.Background())
-	if err != nil {
-		log.Fatal(err)
-	}
-	// fmt.Printf("%#v\n", h)
-
-	e1 := core.Event{
-		DateTime: 12345,
-		Host:     "localhost",
-		Process:  "angryMalvare",
-		Msg:      "preparing to encryption...",
+	cnfg := types.Config{}
+	viper.SetConfigFile("configs/config.yml")
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+	} else {
+		cobra.CheckErr(err)
 	}
 
-	e2 := core.Event{
-		DateTime: 12346,
-		Host:     "localhost",
-		Process:  "angryMalvare",
-		Msg:      "start encryption...",
+	if err := viper.Unmarshal(&cnfg); err != nil {
+		cobra.CheckErr(err)
 	}
 
-	m := core.Msg{
-		HostInfo: h,
-		Events:   []core.Event{e1, e2},
-	}
-
-	res, err := json.Marshal(&m)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(res))
+	fmt.Println(cnfg)
 
 	// 	lm := logs_reader.NewLogsReader("test/auth.log")
 	// 	go lm.ReadLog(logs_reader.FormatSysLog, 0)

@@ -1,9 +1,16 @@
 package types
 
 type Config struct {
-	Field1 string `mapstructure:"field1"`
-	Field2 string `mapstructure:"field2"`
-	Logrus Logrus `mapstructure:"logrus"`
+	Sources  EventSources `mapstructure:"sources"`
+	Logrus   Logrus       `mapstructure:"logrus"`
+	LogFiles []string     `mapstructure:"logfiles"`
+}
+
+type EventSources struct {
+	EnablePacketsChecking bool `mapstructure:"packets"`
+	EnableAppsChecking    bool `mapstructure:"apps"`
+	EnableProcChecking    bool `mapstructure:"proc"`
+	EnableLogsChecking    bool `mapstructure:"logs"`
 }
 
 type Logrus struct {
