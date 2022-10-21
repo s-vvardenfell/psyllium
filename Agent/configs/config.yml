@@ -9,5 +9,5 @@ logrus:
   to_json: false
   log_dir: "logs/logs.log"
 logfiles:
-  auth1.log
-  auth2.log
+  - auth1.log
+  - auth2.log
