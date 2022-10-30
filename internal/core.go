@@ -1,4 +1,4 @@
-package core
+package core // TODO refactor pkg
 
 import "fmt"
 
