@@ -3,7 +3,7 @@ package linux_agent
 import (
 	"fmt"
 
-	"github.com/s-vvardenfell/psyllium/internal/core"
+	core "github.com/s-vvardenfell/psyllium/internal"
 )
 
 type LinuxAgent struct {

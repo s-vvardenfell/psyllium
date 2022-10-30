@@ -8,9 +8,10 @@ import (
 	"runtime"
 
 	"github.com/s-vvardenfell/psyllium/config"
-	"github.com/s-vvardenfell/psyllium/internal/core"
-	"github.com/s-vvardenfell/psyllium/internal/core/linux_agent"
-	"github.com/s-vvardenfell/psyllium/internal/core/windows_agent"
+	core "github.com/s-vvardenfell/psyllium/internal"
+	"github.com/s-vvardenfell/psyllium/internal/linux_agent"
+	"github.com/s-vvardenfell/psyllium/internal/windows_agent"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

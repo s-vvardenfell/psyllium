@@ -1,6 +1,6 @@
 package main
 
-import "github.com/s-vvardenfell/psyllium/internal/cmd"
+import "github.com/s-vvardenfell/psyllium/cmd"
 
 func main() {
 	cmd.Execute()
