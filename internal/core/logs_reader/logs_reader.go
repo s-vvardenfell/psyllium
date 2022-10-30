@@ -1,12 +1,13 @@
 package logs_reader
 
 import (
-	"agent/internal/core"
 	"bufio"
 	"fmt"
 	"io"
 	"os"
 	"regexp"
+
+	"github.com/s-vvardenfell/psyllium/internal/core"
 )
 
 var (

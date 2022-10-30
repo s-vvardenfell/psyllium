@@ -1,6 +1,6 @@
 package frontend
 
-import "agent/internal/core"
+import "github.com/s-vvardenfell/psyllium/internal/core"
 
 type restFrontEnd struct {
 	// c *core.Core

@@ -1,10 +1,11 @@
 package logs_reader
 
 import (
-	"agent/internal/core"
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/s-vvardenfell/psyllium/internal/core"
 )
 
 func FormatSysLog(event string) (*core.Event, error) {

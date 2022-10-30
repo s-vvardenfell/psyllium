@@ -1,16 +1,16 @@
 package cmd
 
 import (
-	"agent/internal/core"
-	"agent/internal/core/linux_agent"
-	"agent/internal/core/windows_agent"
-	"agent/pkg/types"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 
+	"github.com/s-vvardenfell/psyllium/config"
+	"github.com/s-vvardenfell/psyllium/internal/core"
+	"github.com/s-vvardenfell/psyllium/internal/core/linux_agent"
+	"github.com/s-vvardenfell/psyllium/internal/core/windows_agent"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -18,7 +18,7 @@ import (
 
 var (
 	cfgFile string
-	cnfg    types.Config
+	cnfg    config.Config
 )
 
 var rootCmd = &cobra.Command{
@@ -63,7 +63,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is configs/config.yml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is config/config.yml)")
 	rootCmd.Flags().BoolP("debug", "d", false, "Runs in debug-mode")
 }
 
@@ -79,7 +79,7 @@ func ConfigureViper() {
 		wd, err := os.Getwd()
 		cobra.CheckErr(err)
 
-		viper.AddConfigPath(filepath.Join(wd, "configs"))
+		viper.AddConfigPath(filepath.Join(wd, "config"))
 		viper.SetConfigName("config")
 		viper.SetConfigType("yml")
 	}

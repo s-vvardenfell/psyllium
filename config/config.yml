@@ -7,7 +7,7 @@ logrus:
   log_level: 4
   to_file: true
   to_json: false
-  log_dir: "logs/logs.log"
+  log_dir: "log/log.log"
 logfiles:
   - auth1.log
   - auth2.log

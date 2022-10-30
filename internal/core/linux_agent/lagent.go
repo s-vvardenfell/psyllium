@@ -1,8 +1,9 @@
 package linux_agent
 
 import (
-	"agent/internal/core"
 	"fmt"
+
+	"github.com/s-vvardenfell/psyllium/internal/core"
 )
 
 type LinuxAgent struct {

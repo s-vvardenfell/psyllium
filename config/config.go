@@ -1,4 +1,4 @@
-package types
+package config
 
 type Config struct {
 	Sources  EventSources `mapstructure:"sources"`

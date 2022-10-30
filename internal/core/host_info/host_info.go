@@ -1,7 +1,6 @@
 package host_info
 
 import (
-	"agent/internal/core"
 	"context"
 	"errors"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	"github.com/caarlos0/env"
+	"github.com/s-vvardenfell/psyllium/internal/core"
 )
 
 var (
