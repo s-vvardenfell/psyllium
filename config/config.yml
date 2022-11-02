@@ -1,0 +1,13 @@
+sources:
+  packets: false
+  apps: false
+  proc: false
+  logs: true
+logrus:
+  log_level: 4
+  to_file: true
+  to_json: false
+  log_dir: "log/log.log"
+logfiles:
+  - auth1.log
+  - auth2.log
